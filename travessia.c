@@ -6,7 +6,24 @@
  * posOrdem(esq, dir, raiz)
  */
 
-emOrdem(tNo *n) {
+typedef struct no_t {
+    struct tNo *esq;
+    struct tNo *dir;
+    char chave;
+    int valor;
+} no_t;
+
+preOrdem(no_t *n) {
+    
+    if(n == NULL)
+        return;
+
+    printf("%d", n->chave);
+    preOrdem(n->esq);
+    preOrdem(n->dir);
+}
+
+emOrdem(no_t *n) {
     
     if(n == NULL)
         return;
@@ -16,7 +33,15 @@ emOrdem(tNo *n) {
     emOrdem(n->dir);
 }
 
+posOrdem(no_t *n) {
+    
+    if(n == NULL)
+        return;
 
+    posOrdem(n->esq);
+    posOrdem(n->dir);
+    printf("%d", n->chave);
+}
 
 
  
