@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 /* tipos de varredura em uma árvore de grau máximo 2 */
 /* a forma de andar em uma árvore é chamado de travessia */
 
@@ -6,14 +9,14 @@
  * posOrdem(esq, dir, raiz)
  */
 
-typedef struct no_t {
+typedef struct tNo {
     struct tNo *esq;
     struct tNo *dir;
     char chave;
     int valor;
-} no_t;
+} tNo;
 
-preOrdem(no_t *n) {
+preOrdem(tNo *n) {
     
     if(n == NULL)
         return;
@@ -23,7 +26,7 @@ preOrdem(no_t *n) {
     preOrdem(n->dir);
 }
 
-emOrdem(no_t *n) {
+emOrdem(tNo *n) {
     
     if(n == NULL)
         return;
@@ -33,7 +36,7 @@ emOrdem(no_t *n) {
     emOrdem(n->dir);
 }
 
-posOrdem(no_t *n) {
+posOrdem(tNo *n) {
     
     if(n == NULL)
         return;
