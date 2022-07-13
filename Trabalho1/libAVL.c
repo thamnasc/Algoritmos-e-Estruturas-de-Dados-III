@@ -11,9 +11,15 @@ tNo *criaNo(tNo *pai, int chave) {
     tNo *no = malloc(sizeof(tNo));
 
     no->chave = chave;
+
     no->esq = NULL;
     no->dir = NULL;
-    no->pai = pai;
+    no->pai = NULL;
+
+    if(pai != NULL)
+        no->altura = pai->altura + 1;
+    else
+        no->altura = 0;
 
     return no;
 }
@@ -32,35 +38,47 @@ emOrdem(tNo *no) {
 /*TODO: verificar se o filho é null, guardar pai para poder inserir*/
 /* talvez o return criaNodo(chave) na base possa resolver */
 /* tentar criar um código que seja genérico para inserção e remoção */
-tNo *inclui(tNo *no, tNo *pai, int chave) {
+/* tNo *inclui(tNo *no, tNo *pai, int chave) {
     
     if(no == NULL) 
         return criaNo(pai, chave);
     
-    /*inclusão de chaves iguais à esquerda*/
+    //inclusão de chaves iguais à esquerda
     if(no->chave >= chave) 
         return inclui(no->esq, no, chave);
     else if(no->chave < chave)
         return inclui(no->dir, no, chave);
-}
+} */
 
 /*protótipo de inclui com backtracing*/
-/* tNo *inclui(tNo *no, int chave) {
+tNo *inclui(tNo *no, int chave) {
     
-    tNo *auxNo;
+    tNo *auxNo, *folha;
 
     if(no == NULL) 
         return NULL;
+        //return criaNo(no, chave);
     
     //inclusão de chaves iguais à esquerda
     if(no->chave >= chave) 
-        if(auxNo = inclui(no->esq, chave) == NULL)
-            return criaNo(no, chave);
+        if(auxNo = inclui(no->esq, chave) == NULL) {
+            folha = criaNo(no, chave);
+            no->esq = folha;
+            return folha;
+            //no->esq = auxNo;
+            //return auxNo;
+        }
     else if(no->chave < chave)
-        if(auxNo = inclui(no->dir, chave) == NULL)
-            return criaNo(no, chave);
+        if(auxNo = inclui(no->dir, chave) == NULL) {
+            folha = criaNo(no, chave);
+            no->dir = folha;
+            return folha;
+            //no->dir = auxNo;
+            //return auxNo;
+        }
+            
     return auxNo;
-} */
+}
 
 /* função utilizada para encontrar o sucessor
  * entre com no->dir do nó que deseja excluir
