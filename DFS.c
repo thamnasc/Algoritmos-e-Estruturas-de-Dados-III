@@ -12,22 +12,22 @@ typedef struct tNo {
     int valor;
 } tNo;
 
-*tNo DFS(tNo *n, int x) {
+*tNo DFS(tNo *no, int x) {
     
     tNo *noAnalisado;
 
     /* verifica se é folha */
-    if(n == NULL)
+    if(no == NULL)
         return NULL;
-    if(n->chave == x)
-        return n;
+    if(no->chave == x)
+        return no;
 
     /* filho da esquerda */
-    if(noAnalisado = DFS(n->esq, x) != NULL)
+    if(noAnalisado = DFS(no->esq, x) != NULL)
         return noAnalisado;
     /* filho da direita */
-    if(noAnalisado = DFS(n->dir, x) != NULL)
+    if(noAnalisado = DFS(no->dir, x) != NULL)
         return noAnalisado;
 
-    return NULL; /* nó pai */ 
+    return NULL; /* nó raiz da subárvore não é a chave buscada*/ 
 }
