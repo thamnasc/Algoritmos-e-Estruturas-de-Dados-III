@@ -2,24 +2,26 @@
 
 rotacaoDir(tNo *x) {
     
-    tNo *y;
-
-    y = x->pai;
+    tNo *y = x->pai;
     y->esq = x->dir;
-    x->dir->pai = y;
+    if(x->dir != NULL)
+        x->dir->pai = y;
     x->dir = y;
     x->pai = y->pai;
     y->pai = x;
+
+    return y;
 }
 
 rotacaoEsq(tNo *x) {
 
-    tNo *y;
-
-    y = x->dir;
+    tNo *y = x->dir;
     x->dir = y->esq;
-    y->esq->pai = x;
+    if(y->esq != NULL)
+        y->esq->pai = x;
     y->esq = x;
     y->pai = x->pai;
     x->pai = y;
+
+    return y;
 }
