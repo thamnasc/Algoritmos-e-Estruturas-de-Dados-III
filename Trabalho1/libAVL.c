@@ -6,25 +6,20 @@ typedef struct tNo {
     struct tNo *esq, *dir, *pai;
 } tNo;
 
-tNo *criaNo(tNo *pai, int chave) {
+tNo *criaNo(int chave) {
     
     tNo *no = malloc(sizeof(tNo));
 
     no->chave = chave;
+    no->altura = 0;
 
     no->esq = NULL;
     no->dir = NULL;
     no->pai = NULL;
 
-    if(pai != NULL)
-        no->altura = pai->altura + 1;
-    else
-        no->altura = 0;
-
     return no;
 }
 
-/*TODO: modificar emOrdem para imprimir a altura junto também*/
 emOrdem(tNo *no) {
     
     if(no == NULL)
@@ -35,55 +30,30 @@ emOrdem(tNo *no) {
     emOrdem(no->dir);
 }
 
-/*TODO: verificar se o filho é null, guardar pai para poder inserir*/
-/* talvez o return criaNodo(chave) na base possa resolver */
-/* tentar criar um código que seja genérico para inserção e remoção */
-/* tNo *inclui(tNo *no, tNo *pai, int chave) {
-    
-    if(no == NULL) 
-        return criaNo(pai, chave);
-    
-    //inclusão de chaves iguais à esquerda
-    if(no->chave >= chave) 
-        return inclui(no->esq, no, chave);
-    else if(no->chave < chave)
-        return inclui(no->dir, no, chave);
-} */
-
-/*protótipo de inclui com backtracing*/
 tNo *inclui(tNo *no, int chave) {
-    
-    tNo *auxNo, *folha;
 
     if(no == NULL) 
-        return NULL;
-        //return criaNo(no, chave);
+        return criaNo(chave);
     
-    //inclusão de chaves iguais à esquerda
-    if(no->chave >= chave) 
-        if(auxNo = inclui(no->esq, chave) == NULL) {
-            folha = criaNo(no, chave);
-            no->esq = folha;
-            return folha;
-            //no->esq = auxNo;
-            //return auxNo;
-        }
-    else if(no->chave < chave)
-        if(auxNo = inclui(no->dir, chave) == NULL) {
-            folha = criaNo(no, chave);
-            no->dir = folha;
-            return folha;
-            //no->dir = auxNo;
-            //return auxNo;
-        }
+    //inclui chave igual à esquerda
+    if(no->chave >= chave) {
+        no->esq = inclui(no->esq, chave);
+        no->esq->pai = no;
+        no->esq->altura = no->pai->altura + 1;
+    }
+    else { //no->chave < chave
+        no->dir = inclui(no->dir, chave);
+        no->dir->pai = no;
+        no->dir->altura = no->pai->altura + 1;
+    }
             
-    return auxNo;
+    return no;
 }
 
-/* função utilizada para encontrar o sucessor
- * entre com no->dir do nó que deseja excluir
- * o sucessor é o nó mais a esquerda da subárvore
- * à direita
+/* Função utilizada para encontrar o sucessor.
+ * Entre com no->dir do nó que deseja excluir
+ * o sucessor é o nó mais a esquerda da sua
+ * subárvore à direita
  */
 tNo *minimo(tNo *no) {
     
@@ -93,48 +63,145 @@ tNo *minimo(tNo *no) {
         return minimo(no->esq);
 }
 
-/* a cada rotação preciso lembrar de
+/* TODO: a cada rotação preciso lembrar de
  * verificar a altura e ajustar
  */
 rotacaoDir(tNo *x) {
     
-    tNo *y;
-
-    y = x->pai;
+    tNo *y = x->pai;
     y->esq = x->dir;
-    x->dir->pai = y;
+    if(x->dir != NULL)
+        x->dir->pai = y;
     x->dir = y;
     x->pai = y->pai;
     y->pai = x;
+
+    return y;
 }
 
 rotacaoEsq(tNo *x) {
 
-    tNo *y;
-
-    y = x->dir;
+    tNo *y = x->dir;
     x->dir = y->esq;
-    y->esq->pai = x;
+    if(y->esq != NULL)
+        y->esq->pai = x;
     y->esq = x;
     y->pai = x->pai;
     x->pai = y;
+
+    return y;
 }
 
-/* a cada deleção dar um jeito de verificar
+/* TODO: verificar chaves repetidas */
+tNo *busca(tNo *no, int chave) {
+    
+    if(no == NULL)
+        return NULL;
+    
+    if(no->chave > chave) 
+        return busca(no->esq, chave);
+    else if(no->chave < chave)
+        return busca(no->dir, chave);
+    else
+        return no;
+}
+
+/* se o nó da vez for filho esq, 
+ * entrar com filho dir para verificar,
+ * caso o nó da vez seja o filho dir, 
+ * entrar com o filho esq
+ */
+/* int balanco(tNo *no, int altura) {
+
+    return abs(no->altura - altura);
+} */
+
+/* entra com o pai do nó e verifica
+ * a diferença entre a altura de seus filhos
+ */
+/* int balanco(tNo *pai) {
+
+    if(pai->dir != NULL && pai->esq != NULL)
+        return abs(pai->esq->altura - pai->dir->altura);
+    else if(pai->dir == NULL)
+        return 
+} */
+
+/* entra com no->pai->pai se a altura do nó
+ * for ao menos 2
+ * verifica a altura das duas subárvores
+ * retorna a diferença
+ */
+int contaBalanco(tNo *no) {
+
+    tNo *aux = no;
+    int altDir, altEsq;
+    altDir = 0;
+    altEsq = 0;
+
+    while(aux != NULL) {
+        aux = aux->dir;
+        altDir++;
+    }
+    while(no != NULL) {
+        no = no->esq;
+        altEsq++;
+    }
+
+    return abs(altDir - altEsq);
+}
+
+/* TODO: a cada deleção dar um jeito de verificar
  * a altura e alterar
  */
 tNo *exclui(tNo *no, int chave) {
 
-    tNo *next;
+    tNo *next, *nextsFather;
 
     /* encontra o sucessor */
-    next = minimo(no->dir);
+    //next = minimo(no->dir);//
 
     // guardar pai do sucessor para verificar
     // se árvore ficou balanceada depois da deleção
     //verificando de cima para baixo
+    //nextsFather = next->pai;//
 
+    // ==================
 
+    if(no->esq == NULL)
+        transplante(no, no->dir);
+        //nextsFather = next->pai;
+        free(no);
+    else if(no->dir == NULL)
+        transplante(no, no->esq);
+        //nextsFather = next->pai;
+        free(no);
+    else {
+        next = minimo(no->dir);
+        if(next->pai != no) {
+            transplante(no, no->dir);
+            //nextsFather = next->pai;
+            next->dir = next->dir;
+            next->dir->pai = next;
+        }
+        transplante(no, next);
+        //nextsFather = next->pai;
+        next->esq = no->esq;
+        next->esq->pai = next;
+        free(no);
+    }
+}
+
+void transplante(tNo *no, tNo *next) {
+
+    if(no->pai != NULL) {
+        if(no->pai->esq == no)
+            no->pai->esq = next;
+        else
+            no->pai->dir = next;
+        if(next != NULL)
+            next->pai = no->pai;
+    }
 }
 
 
