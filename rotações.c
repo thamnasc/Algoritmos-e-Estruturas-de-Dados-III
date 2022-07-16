@@ -1,6 +1,11 @@
 #include <stdlib.h>
 
-rotacaoDir(tNo *x) {
+typedef struct tNo {
+    char chave;
+    int valor;
+    struct tNo *pai, *esq, *dir;
+} tNo;
+tNo *rotacaoDir(tNo *x) {
     
     tNo *y = x->pai;
     y->esq = x->dir;
@@ -13,7 +18,7 @@ rotacaoDir(tNo *x) {
     return y;
 }
 
-rotacaoEsq(tNo *x) {
+tNo *rotacaoEsq(tNo *x) {
 
     tNo *y = x->dir;
     x->dir = y->esq;
