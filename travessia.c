@@ -16,7 +16,7 @@ typedef struct tNo {
     int valor;
 } tNo;
 
-preOrdem(tNo *n) {
+void preOrdem(tNo *n) {
     
     if(n == NULL)
         return;
@@ -26,7 +26,7 @@ preOrdem(tNo *n) {
     preOrdem(n->dir);
 }
 
-emOrdem(tNo *n) {
+void emOrdem(tNo *n) {
     
     if(n == NULL)
         return;
@@ -36,7 +36,7 @@ emOrdem(tNo *n) {
     emOrdem(n->dir);
 }
 
-posOrdem(tNo *n) {
+void posOrdem(tNo *n) {
     
     if(n == NULL)
         return;
