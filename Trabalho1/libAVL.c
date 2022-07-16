@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct tNo {
     int chave;
@@ -20,7 +22,7 @@ tNo *criaNo(int chave) {
     return no;
 }
 
-emOrdem(tNo *no) {
+void emOrdem(tNo *no) {
     
     if(no == NULL)
         return;
@@ -39,15 +41,23 @@ tNo *inclui(tNo *no, int chave) {
     if(no->chave >= chave) {
         no->esq = inclui(no->esq, chave);
         no->esq->pai = no;
-        no->esq->altura = no->pai->altura + 1;
+        no->esq->altura = no->altura + 1;
     }
     else { //no->chave < chave
         no->dir = inclui(no->dir, chave);
         no->dir->pai = no;
-        no->dir->altura = no->pai->altura + 1;
+        no->dir->altura = no->altura + 1;
     }
             
     return no;
+}
+
+tNo *minimo(tNo *no) {
+
+    if(no->esq == NULL)
+        return no;
+    else 
+        return minimo(no->esq);
 }
 
 /* Função utilizada para encontrar o sucessor.
@@ -55,18 +65,27 @@ tNo *inclui(tNo *no, int chave) {
  * o sucessor é o nó mais a esquerda da sua
  * subárvore à direita
  */
-tNo *minimo(tNo *no) {
+tNo *sucessor(tNo *no) {
     
-    if(no->esq == NULL)
-        return no;
-    else
-        return minimo(no->esq);
+    tNo *next = NULL;
+
+    if(no->dir != NULL)
+        return minimo(no->dir);
+    else {
+        next = no->pai;
+        while(next != NULL && no == next->dir) {
+            no = next;
+            next = next->pai;
+        }
+    }
+
+    return next;
 }
 
 /* TODO: a cada rotação preciso lembrar de
  * verificar a altura e ajustar
  */
-rotacaoDir(tNo *x) {
+tNo *rotacaoDir(tNo *x) {
     
     tNo *y = x->pai;
     y->esq = x->dir;
@@ -79,7 +98,7 @@ rotacaoDir(tNo *x) {
     return y;
 }
 
-rotacaoEsq(tNo *x) {
+tNo *rotacaoEsq(tNo *x) {
 
     tNo *y = x->dir;
     x->dir = y->esq;
@@ -106,27 +125,6 @@ tNo *busca(tNo *no, int chave) {
         return no;
 }
 
-/* se o nó da vez for filho esq, 
- * entrar com filho dir para verificar,
- * caso o nó da vez seja o filho dir, 
- * entrar com o filho esq
- */
-/* int balanco(tNo *no, int altura) {
-
-    return abs(no->altura - altura);
-} */
-
-/* entra com o pai do nó e verifica
- * a diferença entre a altura de seus filhos
- */
-/* int balanco(tNo *pai) {
-
-    if(pai->dir != NULL && pai->esq != NULL)
-        return abs(pai->esq->altura - pai->dir->altura);
-    else if(pai->dir == NULL)
-        return 
-} */
-
 /* entra com no->pai->pai se a altura do nó
  * for ao menos 2
  * verifica a altura das duas subárvores
@@ -151,12 +149,38 @@ int contaBalanco(tNo *no) {
     return abs(altDir - altEsq);
 }
 
+void transplante(tNo *no, tNo *next) {
+
+    if(no->pai != NULL) {
+        if(no->pai->esq == no) {
+            no->pai->esq = next;
+        }
+            
+        else
+            no->pai->dir = next;
+    }
+    if(next != NULL)
+        next->pai = no->pai;
+}
+
+int contaNos(tNo *no) {
+    
+    if(no == NULL)
+        return 0;
+
+    return contaNos(no->esq) + contaNos(no->dir) + 1;
+}
+
 /* TODO: a cada deleção dar um jeito de verificar
  * a altura e alterar
  */
-tNo *exclui(tNo *no, int chave) {
+tNo *exclui(tNo *raiz, tNo *no) {
 
     tNo *next, *nextsFather;
+    tNo *novaRaiz = raiz;
+    //tNo *no;
+    //if((no = busca(raiz, chave)) == NULL)
+    //return novaRaiz;
 
     /* encontra o sucessor */
     //next = minimo(no->dir);//
@@ -168,16 +192,30 @@ tNo *exclui(tNo *no, int chave) {
 
     // ==================
 
-    if(no->esq == NULL)
+    if(no->esq == NULL) {
         transplante(no, no->dir);
         //nextsFather = next->pai;
+
+        /* caso de dois nós e quero excluir a raiz */
+        if(no->pai == NULL) {
+            novaRaiz = no->dir;
+            novaRaiz->altura = 0;
+        }
         free(no);
-    else if(no->dir == NULL)
+    }
+    else if(no->dir == NULL) {
         transplante(no, no->esq);
         //nextsFather = next->pai;
+
+        /* caso de dois nós e quero excluir a raiz */
+        if(no->pai == NULL) {
+            novaRaiz = no->esq;
+            novaRaiz->altura = 0;
+        }  
         free(no);
+    }
     else {
-        next = minimo(no->dir);
+/*         next = sucessor(no->dir);
         if(next->pai != no) {
             transplante(no, no->dir);
             //nextsFather = next->pai;
@@ -188,20 +226,125 @@ tNo *exclui(tNo *no, int chave) {
         //nextsFather = next->pai;
         next->esq = no->esq;
         next->esq->pai = next;
+        if(no == raiz)
+            novaRaiz = next;
+        free(no); */
+        next = sucessor(no);
+        transplante(next, next->dir);
+        next->esq = no->esq;
+        next->dir = no->dir;
+        transplante(no, next);
+        if(no == raiz)
+            novaRaiz = next;
         free(no);
     }
+
+    return novaRaiz;
 }
 
-void transplante(tNo *no, tNo *next) {
+tNo *executaOp(tNo *raiz, char op, int key) {
 
-    if(no->pai != NULL) {
-        if(no->pai->esq == no)
-            no->pai->esq = next;
-        else
-            no->pai->dir = next;
-        if(next != NULL)
-            next->pai = no->pai;
+    if(op == 'i') {
+        if((raiz = inclui(raiz, key)) != NULL) {
+            printf("Incluiu!");
+        }
+    }  
+    else /* r */
+        if((raiz = exclui(raiz, key)) != NULL)
+            printf("excluiu!");
+
+    return raiz;  
+}
+
+int main() {
+
+    char op;
+    int key;
+    char *str = NULL;
+    size_t len = 0;
+    char *number;
+    int keyArray[1000];
+    int i = -1;
+    tNo *raiz = NULL;
+    tNo *aux = NULL;
+    
+    /* percorre o arquivo até o fgets chegar ao final do arquivo */ 
+//    while(fgets(str, 50, file) != NULL) {
+
+        /* exemplo de entrada: "i 10" */
+
+        /* pega a operação */
+        //op = str[0];
+        /* pega o restante da string depois do espaço */
+        //number = strrchr(str, ' ');
+        /* pega o valor inteiro da string e transforma em int */
+       // key = atoi(number);
+       // printf("op: %c key: %d\n", op, key);
+        
+       // executaOp(raiz, op, key);
+   // }
+
+    //while(getline(&str, &len, stdin) != -1) {
+        /* exemplo de entrada: "i 10" */
+        //printf("%s", str);
+        /* pega a operação */
+        //op = str[0];
+        /* pega o restante da string depois do espaço */
+        //number = strrchr(str, ' ');
+        /* pega o valor inteiro da string e transforma em int */
+        //key = atoi(number);
+
+        //if(op != 'r') {
+            //i++;
+            //keyArray[i] = key;
+        //}
+
+        //printf("op: %c key: %d\n", op, key);
+
+        //raiz = executaOp(raiz, op, key);
+    //}
+    
+    //free(str);
+
+    emOrdem(raiz);
+    raiz = inclui(raiz, 15);
+    raiz = inclui(raiz, 30);
+    raiz = inclui(raiz, 6);
+/*     raiz = exclui(raiz, raiz);
+    raiz = exclui(raiz, raiz);
+    free(raiz); */
+/*     for(i; i > 0; i--) {
+        //if(contaNos(raiz) > 1)
+            //if((aux = busca(raiz, keyArray[j])) != NULL)
+        raiz = exclui(raiz, keyArray[i]);
+    } */
+    while( contaNos(raiz) > 1 ) {
+        emOrdem(raiz);
+        printf("sucessor de %d\n", raiz->chave);
+        raiz = exclui(raiz, raiz);
     }
-}
+    free(raiz);
+/*     raiz = inclui(raiz, 15);
+    raiz = inclui(raiz, 6);
+    raiz = inclui(raiz, 3);
+    printf("%d numero de nos\n", contaNos(raiz));
+    
+    exclui(raiz, busca(raiz, 6), 6);
+    exclui(raiz, busca(raiz, 3), 3);
+    free(raiz); */
+    // printf("imprime raiz %d\n", raiz->chave);
+    //aux = inclui(raiz, 6);
+    
+    //aux = busca(raiz, 6);
+    //free(aux);
+    //printf("imprime busca %d", busca(raiz, 15)->altura);
+    
 
+    
+    //printf(" %d, %d", raiz->esq->chave, raiz->esq->altura);
+    //free(raiz->esq);
+    //free(raiz);
+    
+    return 0;
+}
 
