@@ -50,7 +50,7 @@ void emOrdem(tNo *no) {
         return;
 
     emOrdem(no->esq);
-    printf("%d,%d\n", no->chave, alturaNo(no));
+    printf("%d,%d\n", no->chave, no->altura);
     emOrdem(no->dir);
 }
 
@@ -93,13 +93,13 @@ tNo *sucessor(tNo *no) {
 
     if(no->dir != NULL)
         return minimo(no->dir);
-/*     else {
+    else {
         next = no->pai;
         while(next != NULL && no == next->dir) {
             no = next;
             next = next->pai;
         }
-    } */
+    }
 
     return next;
 }
@@ -174,7 +174,7 @@ int contaBalanco(tNo *no) {
 void transplante(tNo *no, tNo *next) {
 
     if(no->pai != NULL) {
-        if(no->pai->esq == no)
+        if(no->pai->esq == no) 
             no->pai->esq = next;
         else
             no->pai->dir = next;
@@ -191,7 +191,7 @@ int contaNos(tNo *no) {
     return contaNos(no->esq) + contaNos(no->dir) + 1;
 }
 
-tNo *exclui(tNo *raiz, tNo *no) {
+/* tNo *exclui(tNo *raiz, tNo *no) {
     
     tNo *novaRaiz = raiz, *next = sucessor(no);
 
@@ -205,7 +205,7 @@ tNo *exclui(tNo *raiz, tNo *no) {
     }
 
     //nó com um filho no meio da árvore
-/*     else if((no->esq == NULL || no->dir == NULL)) {
+     else if((no->esq == NULL || no->dir == NULL)) {
         if(no->esq->pai == no) {
             if(no->esq == NULL) 
                 no->pai->esq = no->dir;
@@ -222,7 +222,7 @@ tNo *exclui(tNo *raiz, tNo *no) {
             no->pai->dir->pai = no->pai;
         }
         free(no);
-    } */
+    } 
 
     else {
         if((next->pai != no))
@@ -237,15 +237,15 @@ tNo *exclui(tNo *raiz, tNo *no) {
     }
 
     return novaRaiz;
-}
+} */
 
 /* TODO: a cada deleção dar um jeito de verificar
  * a altura e alterar
  */
-/* tNo *exclui(tNo *raiz, tNo *no) {
+tNo *exclui(tNo *raiz, tNo *no) {
 
     tNo *next, *nextsFather;
-    tNo *novaRaiz = raiz; */
+    tNo *novaRaiz = raiz; 
     //tNo *no;
     //if((no = busca(raiz, chave)) == NULL)
     //return novaRaiz;
@@ -260,8 +260,7 @@ tNo *exclui(tNo *raiz, tNo *no) {
 
     // ==================
 
-/*     if(no->esq == NULL) {
-        if(contaNos(raiz) >= 3)
+    if(no->esq == NULL) {
         transplante(no, no->dir);
         //nextsFather = next->pai;
 
@@ -271,43 +270,45 @@ tNo *exclui(tNo *raiz, tNo *no) {
     
         free(no);
     }
-    else if(no->dir == NULL) {
-        transplante(no, no->esq);
-        //nextsFather = next->pai;
-
-        // caso de dois nós e quero excluir a raiz 
-        if(no->pai == NULL) 
-            novaRaiz = no->esq;
-
-        free(no);
-    }
-    else { */
-/*         next = sucessor(no->dir);
-        if(next->pai != no) {
-            transplante(no, no->dir);
+    else {
+        if(no->dir == NULL) {
+            transplante(no, no->esq);
             //nextsFather = next->pai;
-            next->dir = next->dir;
-            next->dir->pai = next;
+
+            // caso de dois nós e quero excluir a raiz 
+            if(no->pai == NULL) 
+                novaRaiz = no->esq;
+
+            free(no);
         }
-        transplante(no, next);
-        //nextsFather = next->pai;
-        next->esq = no->esq;
-        next->esq->pai = next;
-        if(no == raiz)
-            novaRaiz = next;
-        free(no); */
-/*         next = sucessor(no);
-        transplante(next, next->dir);
-        next->esq = no->esq;
-        next->dir = no->dir;
-        transplante(no, next);
-        if(no == raiz)
-            novaRaiz = next;
-        free(no);
+        else { 
+    /*         next = sucessor(no);
+            if(next->pai != no) {
+                transplante(no, no->dir);
+                //nextsFather = next->pai;
+                next->dir = next->dir;
+                next->dir->pai = next;
+            }
+            transplante(no, next);
+            //nextsFather = next->pai;
+            next->esq = no->esq;
+            next->esq->pai = next;
+            if(no == raiz)
+                novaRaiz = next;
+            free(no);  */
+            next = sucessor(no);
+            transplante(next, next->dir);
+            next->esq = no->esq;
+            next->dir = no->dir;
+            transplante(no, next);
+            if(no == raiz)
+                novaRaiz = next;
+            free(no);
+        }
     }
 
     return novaRaiz;
-} */
+} 
 
 tNo *executaOp(tNo *raiz, char op, int key) {
 
@@ -381,7 +382,7 @@ int main() {
             printf("%d eh dir de %d, ", raiz->dir->chave, raiz->chave);
         else
             printf("NULL eh dir de %d, ", raiz->chave);
-        printf("%d eh sucessor de %d\n", aux->chave, raiz->chave); 
+        //printf("%d eh sucessor de %d\n", aux->chave, raiz->chave); 
         raiz = exclui(raiz, raiz);
     }
     free(raiz);
